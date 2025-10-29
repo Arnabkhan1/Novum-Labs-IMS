@@ -1,12 +1,16 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import api from "../../utils/api";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+
+
   const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -73,12 +77,18 @@ const Login = () => {
         </form>
 
         <div className="flex justify-between items-center mt-6 text-sm text-[#7ED6F4]">
-          <a href="/forgot" className="hover:underline">
+           <span
+            className="text-[#7ED6F4] cursor-pointer hover:underline"
+            onClick={() => navigate("/forgot")}
+          >
             Forgot password?
-          </a>
-          <a href="/signup" className="hover:underline">
-            Create new account
-          </a>
+          </span>
+          <span
+            className="text-[#7ED6F4] cursor-pointer hover:underline"
+            onClick={() => navigate("/signup")}
+          >
+            Sign up
+          </span>
         </div>
       </div>
     </div>

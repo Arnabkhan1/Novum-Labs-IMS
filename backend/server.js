@@ -26,7 +26,24 @@ import http from "http";
 dotenv.config();
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+const allowedOrigins = [
+  "http://localhost:5173",           // local dev
+  "https://uxui.designworld.io",     // ✅ তোমার live frontend domain
+  "https://novum-labs-ims.netlify.app" // যদি Netlify ব্যবহার করো
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 // ✅ 1. HTTP server তৈরি করো
