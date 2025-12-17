@@ -12,6 +12,7 @@ const testRegistration = async () => {
                 password: "password123",
                 role: "STUDENT",
                 rollNo: "WEB-01",
+                
                 classId: 1 // আমরা আগেই Class 1 বানিয়েছিলাম Prisma Studio তে? যদি না বানিয়ে থাকেন তবে এটা কাজ করবে না।
             })
         });
