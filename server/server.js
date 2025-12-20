@@ -1,29 +1,38 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const connectDB = require('./config/db');
+const adminRoutes = require('./routes/adminRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
+const roadmapRoutes = require('./routes/roadmapRoutes');
+const authRoutes = require('./routes/authRoutes');
 
-// Import Routes
-import authRoutes from './src/routes/authRoutes.js'; // <-- এই লাইনটি যোগ করুন
-import studentRoutes from './src/routes/studentRoutes.js';
-
-
+// কনফিগারেশন লোড
 dotenv.config();
+
+// ডাটাবেস কানেকশন কল করা
+connectDB();
+
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
-app.use(cors({ origin: '*', credentials: true }));
-app.use(express.json());
+// মিডলওয়্যার (Frontend এর সাথে কানেক্ট করার জন্য)
+app.use(cors());
+app.use(express.json()); // JSON ডাটা রিসিভ করার জন্য
+app.use('/uploads', express.static('uploads'));
 
-// Use Routes
-app.use('/api/auth', authRoutes); // <-- এই লাইনটি যোগ করুন (Base URL)
-app.use('/api/students', studentRoutes); // <-- এই লাইনটি যোগ করুন (Base URL)
-
+// বেসিক রাউট (টেস্ট করার জন্য)
 app.get('/', (req, res) => {
-    res.json({ message: 'Novum Labs API is Running... 🚀' });
+  res.send('API is running...');
 });
 
+
+app.use('/api/admin', adminRoutes);
+app.use('/api/schedule', scheduleRoutes);
+app.use('/api/roadmap', roadmapRoutes);
+app.use('/api/auth', authRoutes);
+
+// সার্ভার চালু করা
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

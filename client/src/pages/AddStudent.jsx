@@ -1,31 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Save, ArrowLeft, UserPlus, ChevronDown } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { User, Mail, Lock, Phone, UserCheck, Layers, Hash, Save, Loader2, Briefcase } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const AddStudent = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState([]); // ক্লাস লিস্ট রাখার জন্য
-  
+  const [teachers, setTeachers] = useState([]);
+
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
+    password: '',
     phone: '',
-    classId: '', // এখানে সিলেক্ট করা ক্লাসের আইডি বসবে
+    guardianName: '',
+    userClass: '', // লক্ষ্য করুন: backend-এ এটি 'class' নামে রিসিভ হচ্ছে কিনা চেক করবেন
+    rollNo: '',
+    teacherId: ''
   });
 
-  // ১. পেজ লোড হলেই ক্লাসগুলো নিয়ে আসবে
+  // ১. টিচারদের লিস্ট লোড করা
   useEffect(() => {
-    const fetchClasses = async () => {
+    const fetchTeachers = async () => {
       try {
-        const response = await api.get('/students/classes');
-        setClasses(response.data);
+        const response = await api.get('/schedule/teachers');
+        setTeachers(response.data);
       } catch (error) {
-        console.error("Failed to load classes");
+        console.error("Failed to load teachers", error);
       }
     };
-    fetchClasses();
+    fetchTeachers();
   }, []);
 
   const handleChange = (e) => {
@@ -34,118 +37,134 @@ const AddStudent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.classId) {
-        toast.error("Please select a class!");
-        return;
-    }
-
     setLoading(true);
-    
-    const randomId = Math.floor(1000 + Math.random() * 9000);
-    const autoEmail = `student${randomId}@novum.com`; 
-    
-    const payload = {
-        name: formData.name,
-        phone: formData.phone,
-        classId: parseInt(formData.classId),
-        
-        email: autoEmail,
-        password: '123',
-        rollNo: `R-${randomId}`,
-        guardianName: 'N/A',
-        role: 'STUDENT'
-    };
 
     try {
-      await api.post('/auth/register', payload);
-      toast.success('Student Added Successfully!');
-      setTimeout(() => navigate('/students'), 1000);
+      // ২. ডাটা পাঠানো (সাথে role: 'STUDENT' হার্ডকোড করে দেওয়া হলো যাতে ভুল না হয়)
+      // নোট: যদি আপনার ব্যাকএন্ড রাউট '/auth/register' হয়, তবে সেটি ব্যবহার করবেন।
+      // এখানে আপনার দেওয়া '/admin/add-student' রাখা হলো।
+      const response = await api.post('/admin/add-student', { ...formData, role: 'STUDENT' });
+      
+      if(response.data) {
+        toast.success("Student Added Successfully! 🎉");
+        // ফর্ম রিসেট
+        setFormData({
+            name: '', email: '', password: '', phone: '', guardianName: '', userClass: '', rollNo: '', teacherId: ''
+        });
+      }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to add student!');
+      const errorMsg = error.response?.data?.message || 'Something went wrong!';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-start pt-4 animate-fade-in">
-      <Toaster position="top-center" toastOptions={{ style: { background: '#1e293b', color: '#fff' } }} />
+    <div className="max-w-4xl mx-auto animate-fade-in">
       
-      <div className="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-800 relative">
+      {/* Header Section */}
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+          <UserCheck className="text-novum-cyan" size={32} />
+          Register New Student
+        </h1>
+        <p className="text-novum-muted mt-2 ml-1 text-sm md:text-base">Enter the student's details and assign a teacher.</p>
+      </div>
+
+      {/* Form Card */}
+      <div className="bg-novum-light p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
         
-        {/* Header */}
-        <div className="flex items-center mb-8 pb-4 border-b border-slate-800">
-            <button onClick={() => navigate('/students')} className="mr-4 text-slate-400 hover:text-cyan-400">
-                <ArrowLeft size={24} />
-            </button>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                <UserPlus className="text-cyan-400" /> New Admission
-            </h1>
-        </div>
+        {/* Background Glow */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-novum-cyan/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-400 mb-2">Student Name</label>
-            <input required name="name" type="text" onChange={handleChange} 
-              className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:border-cyan-500 outline-none transition" 
-              placeholder="Enter full name" 
-            />
-          </div>
+          {/* Inputs */}
+          <InputGroup label="Full Name" name="name" icon={User} placeholder="e.g. Rahul Sharma" value={formData.name} onChange={handleChange} />
+          
+          <InputGroup label="Email Address" name="email" icon={Mail} type="email" placeholder="student@example.com" value={formData.email} onChange={handleChange} />
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-400 mb-2">Phone Number</label>
-            <input required name="phone" type="text" onChange={handleChange} 
-              className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:border-cyan-500 outline-none transition" 
-              placeholder="017..." 
-            />
-          </div>
+          <InputGroup label="Password" name="password" icon={Lock} type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} />
 
-          {/* Class Dropdown (Select Menu) */}
-          <div className="relative">
-            <label className="block text-sm font-semibold text-slate-400 mb-2">Assign Class / Course</label>
+          <InputGroup label="Phone Number" name="phone" icon={Phone} placeholder="017..." value={formData.phone} onChange={handleChange} />
+
+          <InputGroup label="Guardian Name" name="guardianName" icon={UserCheck} placeholder="Father/Mother Name" value={formData.guardianName} onChange={handleChange} />
+
+          {/* Note: Backend এ যদি 'class' ফিল্ড থাকে, তবে state name এবং backend schema মিলিয়ে নেবেন */}
+          <InputGroup label="Class / Course" name="userClass" icon={Layers} placeholder="e.g. Class 10" value={formData.userClass} onChange={handleChange} />
+
+          <InputGroup label="Roll Number" name="rollNo" icon={Hash} placeholder="e.g. 101" value={formData.rollNo} onChange={handleChange} />
+
+          {/* Teacher Select Dropdown */}
+          <div className="space-y-2 group">
+            <label className="text-xs font-bold text-novum-muted uppercase tracking-widest ml-1 group-focus-within:text-novum-cyan transition-colors">
+              Assign Teacher
+            </label>
             <div className="relative">
-                <select 
-                    required 
-                    name="classId" 
-                    onChange={handleChange} 
-                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white focus:border-cyan-500 outline-none appearance-none cursor-pointer transition"
-                    defaultValue=""
-                >
-                    <option value="" disabled>Select a Class (e.g. B.Tech, Class 10)</option>
-                    {classes.length > 0 ? (
-                        classes.map((cls) => (
-                            <option key={cls.id} value={cls.id}>
-                                {cls.name} - {cls.section}
-                            </option>
-                        ))
-                    ) : (
-                        <option disabled>Loading classes...</option>
-                    )}
-                </select>
-                {/* Custom Arrow Icon */}
-                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
-                    <ChevronDown size={20} />
-                </div>
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-novum-cyan transition-colors">
+                <Briefcase size={18} />
+              </div>
+              <select
+                name="teacherId"
+                value={formData.teacherId}
+                onChange={handleChange}
+                className="w-full pl-11 pr-4 py-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white focus:outline-none focus:border-novum-cyan focus:ring-1 focus:ring-novum-cyan transition-all appearance-none cursor-pointer"
+              >
+                <option value="">-- Select Teacher (Optional) --</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher._id} value={teacher._id}>
+                    {teacher.name}
+                  </option>
+                ))}
+              </select>
+              {/* Dropdown Arrow */}
+              <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+              </div>
             </div>
-            <p className="text-xs text-slate-600 mt-2">* Select the course or class from the list.</p>
           </div>
 
-          <button type="submit" disabled={loading}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(8,145,178,0.3)] mt-6 flex justify-center items-center gap-2 hover:-translate-y-1 transition-transform"
-          >
-            <Save size={20} />
-            {loading ? "Saving..." : "Confirm Admission"}
-          </button>
+          {/* Submit Button - Full width on mobile, spans 2 cols on desktop */}
+          <div className="md:col-span-2 mt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-novum-cyan to-blue-600 hover:from-novum-hover hover:to-blue-700 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />}
+              {loading ? 'Saving Student...' : 'Save Student Details'}
+            </button>
+          </div>
 
         </form>
       </div>
     </div>
   );
 };
+
+// Reusable Input Component
+const InputGroup = ({ label, name, icon: Icon, type = "text", placeholder, value, onChange }) => (
+  <div className="space-y-2 group">
+    <label className="text-xs font-bold text-novum-muted uppercase tracking-widest ml-1 group-focus-within:text-novum-cyan transition-colors">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-novum-cyan transition-colors">
+        <Icon size={18} />
+      </div>
+      <input
+        required
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full pl-11 pr-4 py-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-novum-cyan focus:ring-1 focus:ring-novum-cyan transition-all"
+        placeholder={placeholder}
+      />
+    </div>
+  </div>
+);
 
 export default AddStudent;

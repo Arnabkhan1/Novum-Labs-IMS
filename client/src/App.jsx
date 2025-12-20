@@ -1,27 +1,42 @@
-// client/src/App.jsx
-import { Routes, Route } from 'react-router-dom';
-import Layout from "./components/Layout"; 
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Students from "./pages/Students";
-import AddStudent from "./pages/AddStudent";
-import EditStudent from "./pages/EditStudent";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+
+// Pages Import
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import AddStudent from './pages/AddStudent';
+import StudentsList from './pages/StudentsList';
+import AddTeacher from './pages/AddTeacher';
+import Schedule from './pages/Schedule';
+import Roadmap from './pages/Roadmap';
+import EditStudent from './pages/EditStudent';
 
 function App() {
   return (
     <Routes>
-      {/* 1. Login Page (Layout এর বাইরে) */}
-      <Route path="/" element={<Login />} />
+      {/* 1. Login Page (Public) */}
+      <Route path="/login" element={<Login />} />
 
-      {/* 2. Protected Routes (Layout এর ভেতরে) */}
-      {/* এর ভেতরে যা থাকবে, সবগুলোতে Sidebar & Navbar থাকবে */}
-      <Route element={<Layout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/students" element={<Students />} />
-        <Route path="/add-student" element={<AddStudent />} />
-        <Route path="/edit-student/:id" element={<EditStudent />} />
+      {/* 2. Protected Routes (Login করা থাকলে ঢুকতে পারবে) */}
+      <Route element={<ProtectedRoute />}>
+        
+        {/* 3. Layout (এর ভেতরে সাইডবার আছে) */}
+        <Route element={<Layout />}>
+           {/* 4. Dashboard & Other Pages */}
+           <Route path="/" element={<Dashboard />} />
+           <Route path="/students" element={<StudentsList />} />
+           <Route path="/add-student" element={<AddStudent />} />
+           <Route path="/add-teacher" element={<AddTeacher />} />
+           <Route path="/schedule" element={<Schedule />} />
+           <Route path="/roadmap" element={<Roadmap />} />
+           <Route path="/edit-student/:id" element={<EditStudent />} />
+        </Route>
+
       </Route>
 
+      {/* ভুল লিংকে গেলে ড্যাশবোর্ডে পাঠাবে */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

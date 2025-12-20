@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* আমাদের Novum থিম এখানে সেট করা হলো */
+@theme {
+  --color-novum-dark: #0f172a;  /* Deep Navy */
+  --color-novum-light: #1e293b; /* Card Background */
+  --color-novum-cyan: #06b6d4;  /* Highlight Color */
+  --color-novum-hover: #0891b2; /* Hover Color */
+  --color-novum-text: #f1f5f9;  /* White Text */
+  --color-novum-muted: #94a3b8; /* Gray Text */
+
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}

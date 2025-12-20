@@ -1,38 +1,28 @@
-# 🏫 Novum Labs - Institute Management System (IMS)
+# Novum Labs - Institute Management System (IMS)
 
-A full-stack, responsive Institute Management System built to manage students, teachers, fees, and attendance securely and efficiently.
+A full-stack MERN (MongoDB, Express, React, Node.js) application designed to manage institute operations efficiently. It features role-based access control for Admins, Teachers, and Students.
 
-## 🚀 Tech Stack
+## 🚀 Features
 
-### Frontend (Client)
-- **Framework:** React.js (Vite)
-- **Styling:** Tailwind CSS
-- **Icons:** Lucide React
-- **HTTP Client:** Axios
-- **Notifications:** React Hot Toast
+- **Responsive Dashboard:** Fully responsive layout for Mobile, Tablet, and Desktop.
+- **Role-Based Authentication:** Secure login for Admin, Teacher, and Student.
+- **Student Management:** Add, Update, Delete, and View students.
+- **Schedule Management:** Assign classes and view routines.
+- **Resource Sharing:** Upload and download study materials (PDF/Word).
+- **Modern UI:** Built with Tailwind CSS and Lucide React Icons.
 
-### Backend (Server)
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** PostgreSQL (via Supabase)
-- **ORM:** Prisma
-- **Authentication:** JWT & Bcrypt
+## 🛠️ Tech Stack
 
----
+- **Frontend:** React (Vite), Tailwind CSS, React Router DOM, Context API.
+- **Backend:** Node.js, Express.js.
+- **Database:** MongoDB.
+- **Security:** JWT (JSON Web Tokens), Bcrypt.js.
 
-## 📂 Project Structure
+## ⚙️ Installation & Setup
 
-```bash
-novum-labs/
-│
-├── client/         # React Frontend Application
-│   ├── src/
-│   │   ├── pages/  # UI Pages (Login, Dashboard)
-│   │   └── services/ # API Connection
-│
-└── server/         # Node.js Backend API
-    ├── src/
-    │   ├── controllers/ # Business Logic
-    │   └── routes/      # API Endpoints
-    └── prisma/     # Database Schema
+Follow these steps to run the project locally:
 
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-link-here>
+   cd novum-labs-ims
