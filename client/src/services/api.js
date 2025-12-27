@@ -1,19 +1,24 @@
 import axios from 'axios';
 
+// ✅ অটোমেটিক সুইচিং লজিক
+// যদি ব্রাউজারের লিংকে 'localhost' থাকে, তবে লোকাল সার্ভার ব্যবহার করবে।
+// আর যদি লাইভ সাইট (Vercel) হয়, তবে Render-এর সার্ভার ব্যবহার করবে।
+
+const isLocal = window.location.hostname === 'localhost';
+
 const api = axios.create({
-  // ✅ লাইভ সার্ভার লিংক (Render)
-  baseURL: 'https://novum-labs-server.onrender.com/api', 
+  baseURL: isLocal 
+    ? 'http://localhost:5000/api'  // আপনার লোকাল সার্ভার
+    : 'https://novum-labs-server.onrender.com/api', // ⚠️ আপনার Render-এর আসল লিংকটি এখানে বসাবেন
 });
 
-// ✅ Interceptor: প্রতিটা রিকোয়েস্টের সাথে টোকেন পাঠিয়ে দেয়
+// টোকেন সেট করার ইন্টারসেপ্টর (যা ছিল তাই থাকবে)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-}, (error) => {
-  return Promise.reject(error);
 });
 
 export default api;

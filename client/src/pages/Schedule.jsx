@@ -13,13 +13,7 @@ const Schedule = () => {
 
   // ফর্ম ডাটা
   const [formData, setFormData] = useState({
-    studentId: '',
-    teacherId: '',
-    subject: '',
-    date: '',
-    startTime: '',
-    endTime: '',
-    note: ''
+    studentId: '', teacherId: '', subject: '', date: '', startTime: '', endTime: '', note: ''
   });
 
   const fetchData = async () => {
@@ -30,7 +24,6 @@ const Schedule = () => {
           api.get('/schedule/teachers'),
           api.get('/schedule/all')
         ]);
-        
         setStudents(resStudents.data);
         setTeachers(resTeachers.data);
         setSchedules(resSchedules.data);
@@ -55,7 +48,6 @@ const Schedule = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       await api.post('/schedule/create', formData);
       toast.success("Class Scheduled Successfully! 📅");
@@ -82,13 +74,9 @@ const Schedule = () => {
         <div>
            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
              <Calendar className="text-novum-cyan" /> 
-             {user.role === 'STUDENT' ? 'My Class Routine' : (user.role === 'TEACHER' ? 'My Class Schedule' : 'Class Scheduling')}
+             {user.role === 'STUDENT' ? 'My Class Routine' : 'Class Scheduling'}
            </h1>
-           <p className="text-novum-muted text-sm mt-1">
-             {user.role === 'ADMIN' 
-                ? 'Assign classes to students with teachers.' 
-                : 'Check your upcoming classes and timings.'}
-           </p>
+           <p className="text-novum-muted text-sm mt-1">Manage and view weekly recurring class schedules.</p>
         </div>
       </div>
 
@@ -98,28 +86,27 @@ const Schedule = () => {
         {user.role === 'ADMIN' && (
           <div className="lg:col-span-1">
             <div className="bg-novum-light p-6 rounded-3xl border border-slate-800 shadow-xl sticky top-24">
-              <h2 className="text-xl font-bold text-white mb-6 border-b border-slate-700 pb-2">Set New Class</h2>
+              <h2 className="text-xl font-bold text-white mb-6 border-b border-slate-700 pb-2">Set Extra Class</h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                
+                {/* Student Select */}
                 <div className="space-y-2 group">
-                  <label className="text-xs font-bold text-novum-muted uppercase group-focus-within:text-novum-cyan transition-colors">Select Student</label>
+                  <label className="text-xs font-bold text-novum-muted uppercase">Select Student</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-novum-cyan transition"><User size={18}/></div>
-                    <select name="studentId" value={formData.studentId} onChange={handleChange} required 
-                      className="w-full pl-10 p-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white focus:border-novum-cyan outline-none transition appearance-none cursor-pointer">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500"><User size={18}/></div>
+                    <select name="studentId" value={formData.studentId} onChange={handleChange} required className="w-full pl-10 p-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white outline-none focus:border-novum-cyan appearance-none cursor-pointer">
                       <option value="">-- Choose Student --</option>
                       {students.map(s => <option key={s._id} value={s._id}>{s.name} ({s.class})</option>)}
                     </select>
                   </div>
                 </div>
 
+                {/* Teacher Select */}
                 <div className="space-y-2 group">
-                  <label className="text-xs font-bold text-novum-muted uppercase group-focus-within:text-novum-cyan transition-colors">Select Teacher</label>
+                  <label className="text-xs font-bold text-novum-muted uppercase">Select Teacher</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-novum-cyan transition"><Briefcase size={18}/></div>
-                    <select name="teacherId" value={formData.teacherId} onChange={handleChange} required 
-                      className="w-full pl-10 p-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white focus:border-novum-cyan outline-none transition appearance-none cursor-pointer">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500"><Briefcase size={18}/></div>
+                    <select name="teacherId" value={formData.teacherId} onChange={handleChange} required className="w-full pl-10 p-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white outline-none focus:border-novum-cyan appearance-none cursor-pointer">
                       <option value="">-- Choose Teacher --</option>
                       {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
                     </select>
@@ -128,15 +115,13 @@ const Schedule = () => {
 
                 <InputGroup label="Subject" name="subject" icon={BookOpen} placeholder="e.g. Physics" value={formData.subject} onChange={handleChange} />
                 <InputGroup label="Date" name="date" type="date" value={formData.date} onChange={handleChange} />
-
                 <div className="grid grid-cols-2 gap-4">
                    <InputGroup label="Start Time" name="startTime" type="time" value={formData.startTime} onChange={handleChange} />
                    <InputGroup label="End Time" name="endTime" type="time" value={formData.endTime} onChange={handleChange} />
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full bg-novum-cyan hover:bg-novum-hover text-white font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2 mt-4 shadow-lg hover:shadow-cyan-500/20">
-                  {loading ? <Loader2 className="animate-spin" /> : <Save size={18} />}
-                  {loading ? 'Scheduling...' : 'Confirm Schedule'}
+                <button type="submit" disabled={loading} className="w-full bg-novum-cyan hover:bg-novum-hover text-white font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2 mt-4 shadow-lg">
+                  {loading ? <Loader2 className="animate-spin" /> : <Save size={18} />} {loading ? 'Scheduling...' : 'Confirm Schedule'}
                 </button>
               </form>
             </div>
@@ -168,7 +153,7 @@ const Schedule = () => {
                             displayedSchedules.map((schedule) => (
                                 <tr key={schedule._id} className="hover:bg-slate-800/30 transition group">
                                     <td className="p-5">
-                                        <div className="font-bold text-white text-lg">{new Date(schedule.date).toLocaleDateString()}</div>
+                                        <div className="font-bold text-white text-lg">{new Date(schedule.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</div>
                                         <div className="text-novum-cyan text-sm flex items-center gap-1 mt-1 font-mono">
                                             <Clock size={12} /> {schedule.startTime} - {schedule.endTime}
                                         </div>
@@ -176,22 +161,13 @@ const Schedule = () => {
                                     
                                     <td className="p-5">
                                         <p className="font-bold text-white text-base group-hover:text-novum-cyan transition-colors">{schedule.subject}</p>
-                                        
-                                        {user.role === 'TEACHER' && (
-                                            <p className="text-xs text-slate-500 mt-1">Student: <span className="text-slate-300 font-bold">{schedule.student?.name}</span></p>
-                                        )}
-                                        {user.role === 'ADMIN' && (
-                                            <p className="text-xs text-slate-500 mt-1">Student: {schedule.student?.name}</p>
-                                        )}
+                                        <p className="text-xs text-slate-500 mt-1">{schedule.note}</p>
                                     </td>
 
                                     <td className="p-5">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white border border-slate-600">
-                                                {user.role === 'TEACHER' 
-                                                    ? schedule.student?.name?.charAt(0) 
-                                                    : schedule.teacher?.name?.charAt(0)
-                                                }
+                                                {user.role === 'TEACHER' ? schedule.student?.name?.charAt(0) : schedule.teacher?.name?.charAt(0)}
                                             </div>
                                             <span className="text-sm text-slate-300">
                                                 {user.role === 'TEACHER' ? schedule.student?.name : schedule.teacher?.name}
@@ -199,10 +175,17 @@ const Schedule = () => {
                                         </div>
                                     </td>
 
+                                    {/* ✅ স্ট্যাটাস কলাম আপডেট (অটোমেটিক ব্যাজ সহ) */}
                                     <td className="p-5">
-                                        <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
-                                            Confirmed
-                                        </span>
+                                        {schedule.isAuto ? (
+                                            <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20 flex items-center gap-1 w-fit">
+                                                <RefreshCw size={10} /> Weekly Plan
+                                            </span>
+                                        ) : (
+                                            <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+                                                Confirmed
+                                            </span>
+                                        )}
                                     </td>
                                 </tr>
                             ))
@@ -220,25 +203,13 @@ const Schedule = () => {
   );
 };
 
-// Reusable Input Component
+// Reusable Input Component (Same as before)
 const InputGroup = ({ label, name, icon: Icon, type = "text", placeholder, value, onChange }) => (
   <div className="space-y-1 group">
     <label className="text-xs font-bold text-novum-muted uppercase ml-1 group-focus-within:text-novum-cyan transition-colors">{label}</label>
     <div className="relative">
-      {Icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-novum-cyan transition-colors">
-          <Icon size={16} />
-        </div>
-      )}
-      <input
-        required
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        className={`w-full py-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-novum-cyan transition-all ${Icon ? 'pl-10 pr-4' : 'px-4'}`}
-        placeholder={placeholder}
-      />
+      {Icon && <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-novum-cyan"><Icon size={16} /></div>}
+      <input required type={type} name={name} value={value} onChange={onChange} className={`w-full py-3.5 bg-novum-dark border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-novum-cyan transition-all ${Icon ? 'pl-10 pr-4' : 'px-4'}`} placeholder={placeholder} />
     </div>
   </div>
 );

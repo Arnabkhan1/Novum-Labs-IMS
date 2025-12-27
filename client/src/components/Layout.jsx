@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { 
   LayoutDashboard, Users, UserPlus, Calendar, Map, LogOut, Briefcase, 
-  Menu, X, Bell, Search, MessageSquare, HelpCircle, ChevronDown 
+  Menu, X, Bell, Search, MessageSquare, HelpCircle, ChevronDown, Book 
 } from 'lucide-react';
 
 const Layout = () => {
@@ -16,8 +16,8 @@ const Layout = () => {
     { name: 'All Students', path: '/students', icon: Users, role: ['ADMIN', 'TEACHER'] },
     { name: 'Add Student', path: '/add-student', icon: UserPlus, role: ['ADMIN'] },
     { name: 'Add Teacher', path: '/add-teacher', icon: Briefcase, role: ['ADMIN'] },
-    { name: 'Schedule', path: '/schedule', icon: Calendar, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
     { name: 'Roadmap', path: '/roadmap', icon: Map, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
+    { name: 'Student Courses', path: '/student-courses', icon: Book, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
   ];
 
   const myMenu = allMenuItems.filter(item => user && item.role.includes(user.role));

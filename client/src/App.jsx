@@ -11,6 +11,7 @@ import AddTeacher from './pages/AddTeacher';
 import Schedule from './pages/Schedule';
 import Roadmap from './pages/Roadmap';
 import EditStudent from './pages/EditStudent';
+import StudentCourses from './pages/StudentCourses';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
            <Route path="/schedule" element={<Schedule />} />
            <Route path="/roadmap" element={<Roadmap />} />
            <Route path="/edit-student/:id" element={<EditStudent />} />
+           <Route path="/student-courses" element={<StudentCourses />} />
         </Route>
 
       </Route>
