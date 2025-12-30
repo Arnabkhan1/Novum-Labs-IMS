@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { 
   LayoutDashboard, Users, UserPlus, Calendar, Map, LogOut, Briefcase, 
-  Menu, X, Bell, Search, MessageSquare, HelpCircle, ChevronDown, Book 
+  Menu, X, Bell, Search, MessageSquare, HelpCircle, ChevronDown, Book, PieChart, CheckCircle
 } from 'lucide-react';
 
 const Layout = () => {
@@ -11,19 +11,36 @@ const Layout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // ✅ Updated Menu Items with Attendance Logic
   const allMenuItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
+    
+    // Admin & Teacher Only
     { name: 'All Students', path: '/students', icon: Users, role: ['ADMIN', 'TEACHER'] },
+    
+    // Admin Only Management
     { name: 'Add Student', path: '/add-student', icon: UserPlus, role: ['ADMIN'] },
     { name: 'Add Teacher', path: '/add-teacher', icon: Briefcase, role: ['ADMIN'] },
+    
+    // Course Management
+    { name: 'Course Manager', path: '/student-courses', icon: Book, role: ['ADMIN', 'TEACHER'] },
+    { name: 'My Courses', path: '/student-courses', icon: Book, role: ['STUDENT'] }, // Same path, different label logic handles in component
+
+    // Resources
     { name: 'Roadmap', path: '/roadmap', icon: Map, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
-    { name: 'Student Courses', path: '/student-courses', icon: Book, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
+
+    // ✅ Attendance Logic Added Here
+    { name: 'Attendance Manager', path: '/attendance', icon: CheckCircle, role: ['ADMIN'] },
+    { name: 'My Attendance', path: '/my-attendance', icon: PieChart, role: ['STUDENT'] },
   ];
 
+  // Role based filtering
   const myMenu = allMenuItems.filter(item => user && item.role.includes(user.role));
+  
+  // Get Current Page Name for Header
   const currentPage = allMenuItems.find(item => item.path === location.pathname)?.name || 'Portal';
   
-  // আজকের তারিখ ফরম্যাট করা
+  // Date Formatting
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long' });
 
   return (
@@ -49,12 +66,12 @@ const Layout = () => {
         </div>
 
         {/* Menu */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2 mt-2">
-          {myMenu.map((item) => {
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2 mt-2 custom-scrollbar">
+          {myMenu.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (
               <Link 
-                key={item.path} 
+                key={index} 
                 to={item.path}
                 onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
@@ -102,9 +119,9 @@ const Layout = () => {
             <div className="relative w-full group">
                 <Search className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-cyan-400 transition-colors" size={18} />
                 <input 
-                    type="text" 
-                    placeholder="Search anything..." 
-                    className="w-full bg-slate-800 border border-slate-700 text-sm text-white rounded-full py-2.5 pl-10 pr-4 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-slate-500"
+                  type="text" 
+                  placeholder="Search anything..." 
+                  className="w-full bg-slate-800 border border-slate-700 text-sm text-white rounded-full py-2.5 pl-10 pr-4 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-slate-500"
                 />
             </div>
         </div>

@@ -10,6 +10,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const roadmapRoutes = require('./routes/roadmapRoutes');
 const authRoutes = require('./routes/authRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
 
 // কনফিগারেশন লোড
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // সার্ভার চালু
 const PORT = process.env.PORT || 5000;

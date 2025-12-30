@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Search, Trash2, Edit, Phone, Layers, Loader2, RefreshCw, BookOpen, Briefcase, Calendar, Plus, UserCircle, GraduationCap } from 'lucide-react';
+import { Search, Trash2, Edit, Loader2, RefreshCw, BookOpen, Briefcase, Plus, UserCircle, GraduationCap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
 
@@ -17,11 +17,21 @@ const StudentCourses = () => {
     setLoading(true);
     try {
       let url = '/admin/students';
+      
+      // টিচার হলে শুধু তার স্টুডেন্টরা লোড হবে (যদি আপনার ব্যাকএন্ডে এই ফিল্টার থাকে)
       if (user?.role === 'TEACHER') {
         url = `/admin/students?teacherId=${user._id}`;
       }
+      
       const response = await api.get(url);
-      setStudents(response.data);
+      let data = response.data;
+
+      // ✅ SECURITY LOGIC: স্টুডেন্ট হলে পুরো লিস্ট ফিল্টার করে শুধু তাকে রাখা হবে
+      if (user?.role === 'STUDENT') {
+        data = data.filter(student => student._id === user._id);
+      }
+
+      setStudents(data);
     } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to load data");
@@ -56,7 +66,6 @@ const StudentCourses = () => {
       
       {/* === Hero Header Section === */}
       <div className="relative bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-[2.5rem] border border-slate-700/50 shadow-2xl overflow-hidden">
-        {/* Abstract Glows */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-novum-cyan/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] -ml-10 -mb-10 pointer-events-none"></div>
 
@@ -67,28 +76,34 @@ const StudentCourses = () => {
                         <BookOpen className="text-novum-cyan" size={28} />
                    </div>
                    <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                     Course Manager
+                     {user.role === 'STUDENT' ? 'My Course Details' : 'Course Manager'}
                    </h1>
                </div>
                <p className="text-slate-400 text-sm md:text-base ml-1">
-                 Overseeing <span className="text-white font-bold">{students.length} Students</span> and their weekly schedules.
+                 {user.role === 'STUDENT' 
+                    ? "View your assigned subjects, teachers, and weekly schedule."
+                    : <span>Overseeing <span className="text-white font-bold">{students.length} Students</span> and their weekly schedules.</span>
+                 }
                </p>
             </div>
             
-            <div className="flex w-full md:w-auto gap-3">
-                <div className="relative w-full md:w-80 group">
-                    <Search className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-novum-cyan transition-colors" size={20} />
-                    <input 
-                      type="text" 
-                      placeholder="Find student by name or roll..." 
-                      className="w-full pl-12 pr-4 py-3.5 bg-slate-950/30 border border-slate-600/50 rounded-2xl text-white focus:border-novum-cyan/50 focus:bg-slate-900/80 focus:outline-none transition-all shadow-inner backdrop-blur-sm"
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+            {/* Search Bar (Hidden for Students) */}
+            {user.role !== 'STUDENT' && (
+                <div className="flex w-full md:w-auto gap-3">
+                    <div className="relative w-full md:w-80 group">
+                        <Search className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-novum-cyan transition-colors" size={20} />
+                        <input 
+                        type="text" 
+                        placeholder="Find student by name..." 
+                        className="w-full pl-12 pr-4 py-3.5 bg-slate-950/30 border border-slate-600/50 rounded-2xl text-white focus:border-novum-cyan/50 focus:bg-slate-900/80 focus:outline-none transition-all shadow-inner backdrop-blur-sm"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <button onClick={fetchStudents} className="p-3.5 bg-slate-800 border border-slate-600/50 rounded-2xl text-novum-cyan hover:bg-novum-cyan hover:text-black transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95">
+                        <RefreshCw size={22} className={loading ? "animate-spin" : ""} />
+                    </button>
                 </div>
-                <button onClick={fetchStudents} className="p-3.5 bg-slate-800 border border-slate-600/50 rounded-2xl text-novum-cyan hover:bg-novum-cyan hover:text-black transition-all shadow-lg hover:shadow-cyan-500/20 active:scale-95">
-                    <RefreshCw size={22} className={loading ? "animate-spin" : ""} />
-                </button>
-            </div>
+            )}
         </div>
       </div>
 
@@ -97,7 +112,7 @@ const StudentCourses = () => {
         {loading ? (
             <div className="flex flex-col items-center justify-center h-80 text-novum-cyan/80">
                 <Loader2 className="animate-spin mb-4" size={48} />
-                <span className="text-xl font-bold tracking-wide">Fetching Schedules...</span>
+                <span className="text-xl font-bold tracking-wide">Loading Data...</span>
             </div>
         ) : filteredStudents.length > 0 ? (
             
@@ -141,23 +156,24 @@ const StudentCourses = () => {
                             <div className="flex-1 p-6 overflow-hidden">
                                 <div className="flex items-stretch gap-4 overflow-x-auto pb-4 pt-1 px-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                                     
-                                    {/* Edit/Add Button (First for quick access) */}
-                                    <button 
-                                        onClick={() => navigate(`/edit-student/${student._id}`)}
-                                        className="min-w-[60px] flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-700/50 bg-slate-800/20 text-slate-500 hover:text-novum-cyan hover:border-novum-cyan/50 hover:bg-novum-cyan/5 transition-all duration-300 group/add"
-                                    >
-                                        <div className="p-2 rounded-full bg-slate-800 group-hover/add:bg-novum-cyan group-hover/add:text-black transition">
-                                            <Plus size={18}/>
-                                        </div>
-                                        <span className="text-[10px] font-bold uppercase tracking-wide">Manage</span>
-                                    </button>
+                                    {/* Edit/Add Button (Only for Admin) */}
+                                    {user.role === 'ADMIN' && (
+                                        <button 
+                                            onClick={() => navigate(`/edit-student/${student._id}`)}
+                                            className="min-w-[60px] flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-700/50 bg-slate-800/20 text-slate-500 hover:text-novum-cyan hover:border-novum-cyan/50 hover:bg-novum-cyan/5 transition-all duration-300 group/add"
+                                        >
+                                            <div className="p-2 rounded-full bg-slate-800 group-hover/add:bg-novum-cyan group-hover/add:text-black transition">
+                                                <Plus size={18}/>
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-wide">Manage</span>
+                                        </button>
+                                    )}
 
                                     {/* Course Cards */}
                                     {student.courses && student.courses.length > 0 ? (
                                         student.courses.map((course, idx) => (
                                             <div key={idx} className="min-w-[240px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl border border-slate-700/50 p-4 relative group/card hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-900/10 hover:border-novum-cyan/30 transition-all duration-300">
                                                 
-                                                {/* Subject Header */}
                                                 <div className="flex items-start justify-between mb-3">
                                                     <div className="flex items-center gap-2">
                                                         <div className="p-1.5 rounded-lg bg-novum-cyan/10 text-novum-cyan border border-novum-cyan/10">
@@ -167,7 +183,6 @@ const StudentCourses = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Teacher */}
                                                 <div className="mb-4 pl-1">
                                                     <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Instructor</p>
                                                     <div className="flex items-center gap-2 text-slate-300 text-xs font-medium">
@@ -176,7 +191,6 @@ const StudentCourses = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Days */}
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {course.classDays.map((day, dIdx) => (
                                                         <span key={dIdx} className="text-[9px] font-bold uppercase px-2 py-1 rounded-md bg-slate-950 border border-slate-800 text-slate-400 group-hover/card:border-slate-600 transition-colors">
@@ -195,7 +209,7 @@ const StudentCourses = () => {
                                 </div>
                             </div>
 
-                            {/* Right: Actions (Desktop) */}
+                            {/* Right: Actions (Only for Admin) */}
                             {user?.role === 'ADMIN' && (
                                 <div className="hidden lg:flex flex-col justify-center border-l border-slate-800/50 p-4 gap-2">
                                     <button onClick={() => navigate(`/edit-student/${student._id}`)} className="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition" title="Edit Full Profile">
@@ -215,8 +229,9 @@ const StudentCourses = () => {
         ) : (
             <div className="text-center py-24 bg-slate-900/30 rounded-[2.5rem] border border-dashed border-slate-800">
                 <Search size={48} className="mx-auto text-slate-700 mb-4" />
-                <h3 className="text-xl font-bold text-slate-400">No students found</h3>
-                <p className="text-slate-600">Try adjusting your search criteria.</p>
+                <h3 className="text-xl font-bold text-slate-400">
+                    {user.role === 'STUDENT' ? "Profile loading..." : "No students found"}
+                </h3>
             </div>
         )}
       </div>
