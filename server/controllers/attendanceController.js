@@ -15,13 +15,13 @@ const getDailyClassList = async (req, res) => {
 
     let dailyClasses = [];
 
-    // লুপ চালিয়ে আজকের শিডিউল জেনারেট করি
+    // লুপ চালিয়ে আজকের শিডিউল জেনারেট করি
     for (const student of students) {
       if (student.courses && student.courses.length > 0) {
         for (const course of student.courses) {
           if (course.classDays && course.classDays.includes(dayName)) {
             
-            // চেক করি এই ক্লাসের হাজিরা ইতিমধ্যে নেওয়া হয়েছে কিনা
+            // চেক করি এই ক্লাসের হাজিরা ইতিমধ্যে নেওয়া হয়েছে কিনা
             const existingRecord = await Attendance.findOne({
               date: date,
               student: student._id,
@@ -78,13 +78,42 @@ const markClassAttendance = async (req, res) => {
   }
 };
 
-// ৩. স্টুডেন্ট নিজের হিস্ট্রি দেখবে (Student)
+// ৩. স্টুডেন্ট নিজের হিস্ট্রি দেখবে (Student) - [UPDATED with Filters]
+// 3. স্টুডেন্ট হিস্ট্রি (Smart Filter: Admin can view any, Student views own)
 const getStudentHistory = async (req, res) => {
   try {
-    const studentId = req.user._id;
+    // ডিফল্টভাবে লগইন করা ইউজারের আইডি
+    let targetStudentId = req.user._id;
 
-    // লেটেস্ট হাজিরা আগে আসবে
-    const records = await Attendance.find({ student: studentId }).sort({ date: -1 });
+    // যদি ইউজার ADMIN হয় এবং সে অন্য কারো আইডি পাঠায়, তাহলে সেটা সেট হবে
+    if (req.user.role === 'ADMIN' && req.query.studentId) {
+        targetStudentId = req.query.studentId;
+    }
+
+    const { range } = req.query; 
+    let query = { student: targetStudentId }; // student ফিল্ডে টার্গেট আইডি বসবে
+
+    // --- Date Filtering Logic ---
+    if (range && range !== 'all') {
+      const now = new Date();
+      let startDate = new Date();
+
+      if (range === 'weekly') {
+        startDate.setDate(now.getDate() - 7); 
+      } else if (range === 'monthly') {
+        startDate.setMonth(now.getMonth() - 1); 
+      } else if (range === '6months') {
+        startDate.setMonth(now.getMonth() - 6); 
+      } else if (range === 'yearly') {
+        startDate.setFullYear(now.getFullYear() - 1); 
+      }
+      query.date = { $gte: startDate };
+    }
+
+    // ডাটা ফেস করা
+    const records = await Attendance.find(query)
+        .sort({ date: -1 })
+        .populate('student', 'name email'); // নাম দেখানোর জন্য populate করা হলো
 
     // স্ট্যাটাস ক্যালকুলেশন
     const total = records.length;
@@ -92,6 +121,7 @@ const getStudentHistory = async (req, res) => {
     const percentage = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
 
     res.json({
+      studentName: records.length > 0 ? records[0].student.name : "Student",
       stats: { total, present, absent: total - present, percentage },
       history: records
     });
@@ -102,7 +132,7 @@ const getStudentHistory = async (req, res) => {
   }
 };
 
-// ✅ এখানে নিশ্চিত করুন সব ফাংশন এক্সপোর্ট করা হয়েছে
+// ✅ সব ফাংশন এক্সপোর্ট
 module.exports = { 
   getDailyClassList, 
   markClassAttendance, 

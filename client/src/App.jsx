@@ -14,6 +14,7 @@ import EditStudent from './pages/EditStudent';
 import StudentCourses from './pages/StudentCourses';
 import AdminAttendance from './pages/AdminAttendance';
 import MyAttendance from './pages/MyAttendance';
+import AdminStudentReport from './pages/AdminStudentReport';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
            <Route path="/student-courses" element={<StudentCourses />} />
            <Route path="/attendance" element={<AdminAttendance />} />
            <Route path="/my-attendance" element={<MyAttendance />} />
+           <Route path="/student-report" element={<AdminStudentReport />} />
         </Route>
 
       </Route>

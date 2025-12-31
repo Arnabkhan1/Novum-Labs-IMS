@@ -24,7 +24,7 @@ const Layout = () => {
     
     // Course Management
     { name: 'Course Manager', path: '/student-courses', icon: Book, role: ['ADMIN', 'TEACHER'] },
-    { name: 'My Courses', path: '/student-courses', icon: Book, role: ['STUDENT'] }, // Same path, different label logic handles in component
+    { name: 'My Courses', path: '/student-courses', icon: Book, role: ['STUDENT'] },
 
     // Resources
     { name: 'Roadmap', path: '/roadmap', icon: Map, role: ['ADMIN', 'TEACHER', 'STUDENT'] },
@@ -32,6 +32,7 @@ const Layout = () => {
     // ✅ Attendance Logic Added Here
     { name: 'Attendance Manager', path: '/attendance', icon: CheckCircle, role: ['ADMIN'] },
     { name: 'My Attendance', path: '/my-attendance', icon: PieChart, role: ['STUDENT'] },
+    { name: 'Student Report', path: '/student-report', icon: PieChart, role: ['ADMIN'] },
   ];
 
   // Role based filtering
@@ -46,6 +47,28 @@ const Layout = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans">
       
+      {/* === CUSTOM SCROLLBAR CSS === */}
+      <style>{`
+        /* Width */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+          height: 5px;
+        }
+        /* Track */
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        /* Handle */
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #334155; /* Slate 700 */
+          border-radius: 10px;
+        }
+        /* Handle on hover */
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #06b6d4; /* Cyan 500 */
+        }
+      `}</style>
+
       {/* === 1. SIDEBAR (Left) === */}
       <aside 
         className={`
@@ -65,7 +88,7 @@ const Layout = () => {
           </p>
         </div>
 
-        {/* Menu */}
+        {/* Menu (With Custom Scrollbar Class) */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-2 mt-2 custom-scrollbar">
           {myMenu.map((item, index) => {
             const isActive = location.pathname === item.path;
@@ -128,7 +151,7 @@ const Layout = () => {
 
         {/* Right: Icons & Profile */}
         <div className="flex items-center gap-3 md:gap-5">
-           
+            
            {/* Quick Action Icons */}
            <div className="flex items-center gap-2 border-r border-slate-700 pr-4">
                <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition hidden sm:block" title="Help">
